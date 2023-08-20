@@ -1,0 +1,6 @@
+name: BackToLastServer-Bukkit
+version: '${version}'
+main: ink.magma.backtolastserverbukkit.BackToLastServer_Bukkit
+api-version: '1.18'
+authors: [ MagmaBlock ]
+description: BackToLastServer bukkit side handler for login event

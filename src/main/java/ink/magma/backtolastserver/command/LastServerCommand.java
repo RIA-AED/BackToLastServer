@@ -33,12 +33,7 @@ public class LastServerCommand {
                     Player player = (Player) context.getSource();
 
                     // 尝试将玩家发送
-                    boolean tryResult = SendLastServer.sendPlayerLastServer(player);
-                    if (tryResult) {
-                        player.sendMessage(Component.text("尝试将您传送回上次所在的服务器...").color(NamedTextColor.GRAY));
-                    } else {
-                        player.sendMessage(Component.text("找不到上次所在的服务器.").color(NamedTextColor.GRAY));
-                    }
+                    SendLastServer.sendPlayerLastServer(player);
 
                     return 1;
                 })
@@ -61,12 +56,12 @@ public class LastServerCommand {
                             if (targetPlayer.isPresent()) {
                                 boolean tryResult = SendLastServer.sendPlayerLastServer(targetPlayer.get());
                                 if (tryResult) {
-                                    context.getSource().sendMessage(Component.text("Success. Sending player..."));
+                                    context.getSource().sendMessage(Component.text("成功. 正在发送玩家..."));
                                 } else {
-                                    context.getSource().sendMessage(Component.text("This player has no history / The server no longer exists."));
+                                    context.getSource().sendMessage(Component.text("不存在历史或服务器查找失败."));
                                 }
                             } else {
-                                context.getSource().sendMessage(Component.text("Player " + arg + " not find."));
+                                context.getSource().sendMessage(Component.text("玩家 " + arg + " 不存在."));
                             }
                             return 1;
                         })
