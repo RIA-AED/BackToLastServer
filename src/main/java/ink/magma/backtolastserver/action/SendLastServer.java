@@ -7,6 +7,7 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import ink.magma.backtolastserver.BackToLastServer;
 import ink.magma.backtolastserver.store.LastServerStore;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.jetbrains.annotations.NotNull;
 
@@ -42,7 +43,20 @@ public class SendLastServer {
         // 给玩家发送消息
         Component msg = Component.text("正在尝试将您送回上一次的服务器 (").color(NamedTextColor.GRAY)
                 .append(Component.text(lastServerID).color(NamedTextColor.WHITE))
-                .append(Component.text(").").color(NamedTextColor.GRAY));
+                .append(Component.text(").").color(NamedTextColor.GRAY))
+                .append(Component.text("  "))
+                .append(
+                        Component.text("[禁用]")
+                                .color(NamedTextColor.GRAY)
+                                .hoverEvent(
+                                        Component.text("您可以点击此处或使用指令 ")
+                                                .append(Component.text("/togglelastserver").color(NamedTextColor.YELLOW))
+                                                .append(Component.newline())
+                                                .append(Component.text("如果您想要重新打开, 也可在个人菜单中查看."))
+                                )
+                                .clickEvent(ClickEvent.runCommand("/togglelastserver"))
+                );
+
         onlinePlayer.sendMessage(msg);
 
         // 声明连接

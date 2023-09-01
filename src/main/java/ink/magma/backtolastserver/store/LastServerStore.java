@@ -3,6 +3,7 @@ package ink.magma.backtolastserver.store;
 import ink.magma.backtolastserver.BackToLastServer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
@@ -15,9 +16,13 @@ public class LastServerStore {
     public static HashMap<String, String> serverHistory = new HashMap<>();
     static File dataFolder = BackToLastServer.dataDirectory.toFile();
     static File historyFile = new File(dataFolder.getPath(), "history.yml");
-    static Yaml yaml = new Yaml();
+    static Yaml yaml;
 
     public LastServerStore() {
+        DumperOptions dumperOptions = new DumperOptions();
+        dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+        yaml = new Yaml(dumperOptions);
+
         HashMap<String, String> historyInFile = readAllHistory();
         if (historyInFile != null && !historyInFile.isEmpty()) {
             BackToLastServer.logger.info("载入了 " + historyInFile.size() + " 条历史记录.");
@@ -38,16 +43,14 @@ public class LastServerStore {
         serverHistory.remove(playerUUID);
     }
 
-    public void saveAllHistory() {
+    public synchronized void saveAllHistory() {
         if (!dataFolder.exists()) {
-            dataFolder.mkdirs();
+            boolean result = dataFolder.mkdirs();
+            if (!result) BackToLastServer.logger.error("创建插件配置文件夹失败!");
         }
 
-        String yamlString = yaml.dump(serverHistory);
-
-
         try (FileWriter writer = new FileWriter(historyFile)) {
-            writer.write(yamlString);
+            yaml.dump(serverHistory, writer);
         } catch (IOException e) {
             BackToLastServer.logger.error(e.toString());
         }

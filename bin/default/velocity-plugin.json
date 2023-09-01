@@ -1,0 +1,11 @@
+{
+  "id": "backtolastserver",
+  "name": "BackToLastServer",
+  "version": "1.0-SNAPSHOT",
+  "description": "A plugin for Velocity that help players go to their last server after login",
+  "authors": [
+    "MagmaBlock"
+  ],
+  "dependencies": [],
+  "main": "ink.magma.backtolastserver.BackToLastServer"
+}

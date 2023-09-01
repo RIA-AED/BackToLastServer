@@ -18,14 +18,14 @@ import java.util.Optional;
 public class LastServerCommand {
     public static BrigadierCommand createBrigadierCommand(final ProxyServer proxyServer) {
         LiteralCommandNode<CommandSource> backtolastserver = LiteralArgumentBuilder
-                .<CommandSource>literal("backtolastserver")
+                .<CommandSource>literal("lastserver")
                 .executes(context -> {
                     if (!context.getSource().hasPermission("backtolastserver.use")) {
-                        context.getSource().sendMessage(Component.text("No permisson."));
+                        context.getSource().sendMessage(Component.text("没有使用权限."));
                         return 0;
                     }
                     if (context.getSource() instanceof ConsoleCommandSource) {
-                        context.getSource().sendMessage(Component.text("You must enter a player name!").color(NamedTextColor.RED));
+                        context.getSource().sendMessage(Component.text("你必须输入一个玩家的名字!").color(NamedTextColor.RED));
                         return 0;
                     }
 
@@ -46,7 +46,7 @@ public class LastServerCommand {
                         })
                         .executes(context -> {
                             if (!context.getSource().hasPermission("backtolastserver.other")) {
-                                context.getSource().sendMessage(Component.text("No permisson."));
+                                context.getSource().sendMessage(Component.text("没有使用权限."));
                                 return 0;
                             }
 

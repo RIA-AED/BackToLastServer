@@ -6,6 +6,7 @@ import com.velocitypowered.api.proxy.Player;
 import ink.magma.backtolastserver.BackToLastServer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 
 import java.util.Optional;
 
@@ -38,9 +39,9 @@ public class DisableCommand implements SimpleCommand {
         BackToLastServer.disableStore.saveAllDisable();
 
         Component msg;
-        if (isAllow) msg = Component.text("已禁用.").color(NamedTextColor.RED)
+        if (isAllow) msg = Component.text("已禁用.").color(TextColor.color(0xcf1322))
                 .append(Component.text(" 下次登录时, 将始终留在云端.").color(NamedTextColor.WHITE));
-        else msg = Component.text("已启用.").color(NamedTextColor.GREEN)
+        else msg = Component.text("已启用.").color(TextColor.color(0x73d13d))
                 .append(Component.text(" 下次登录时, 将前往您上次离开的服务器.").color(NamedTextColor.WHITE));
 
         source.sendMessage(msg);

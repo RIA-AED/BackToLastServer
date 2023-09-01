@@ -58,8 +58,8 @@ public final class BackToLastServer {
         BrigadierCommand lastServerCommand = LastServerCommand.createBrigadierCommand(server);
         DisableCommand disableCommand = new DisableCommand();
 
-        commandManager.register("backtolastserver", lastServerCommand);
-        commandManager.register("togglebacktolastserver", disableCommand);
+        commandManager.register("lastserver", lastServerCommand);
+        commandManager.register("togglelastserver", disableCommand);
 
         logger.info("BackToLastServer has loaded!");
     }
