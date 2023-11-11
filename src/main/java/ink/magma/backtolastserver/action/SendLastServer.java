@@ -1,6 +1,5 @@
 package ink.magma.backtolastserver.action;
 
-import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
@@ -10,6 +9,8 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.jetbrains.annotations.NotNull;
+import us.ajg0702.queue.api.AjQueueAPI;
+import us.ajg0702.queue.api.server.AdaptedServer;
 
 import java.util.Optional;
 
@@ -44,25 +45,38 @@ public class SendLastServer {
         Component msg = Component.text("正在尝试将您送回上一次的服务器 (").color(NamedTextColor.GRAY)
                 .append(Component.text(lastServerID).color(NamedTextColor.WHITE))
                 .append(Component.text(").").color(NamedTextColor.GRAY))
-                .append(Component.text("  "))
+                .appendSpace()
+                .appendSpace()
                 .append(
                         Component.text("[禁用]")
                                 .color(NamedTextColor.GRAY)
                                 .hoverEvent(
                                         Component.text("您可以点击此处或使用指令 ")
                                                 .append(Component.text("/togglelastserver").color(NamedTextColor.YELLOW))
-                                                .append(Component.newline())
+                                                .appendNewline()
                                                 .append(Component.text("如果您想要重新打开, 也可在个人菜单中查看."))
                                 )
                                 .clickEvent(ClickEvent.runCommand("/togglelastserver"))
+                )
+                .appendSpace()
+                .append(
+                        Component.text("[返回云端]")
+                                .color(NamedTextColor.GRAY)
+                                .hoverEvent(
+                                        Component.text("点击返回")
+                                                .appendNewline()
+                                                .append(Component.text("/lobby").color(NamedTextColor.GRAY))
+                                )
+                                .clickEvent(ClickEvent.runCommand("/lobby"))
                 );
 
         onlinePlayer.sendMessage(msg);
 
-        // 声明连接
-        ConnectionRequestBuilder requestBuilder = onlinePlayer.createConnectionRequest(targetServer.get());
-        // 建立连接 (可能失败)
-        requestBuilder.connect();
+
+        // ajQueue 将玩家加入队列
+        AdaptedServer ajQueueServer = AjQueueAPI.getInstance().getPlatformMethods().getServer(lastServerID);
+        AjQueueAPI.getInstance().getPlatformMethods().getPlayer(onlinePlayer.getUniqueId()).connect(ajQueueServer);
+
         return true;
     }
 }
