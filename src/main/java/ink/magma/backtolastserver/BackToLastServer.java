@@ -21,6 +21,7 @@ import ink.magma.backtolastserver.store.LastServerStore;
 import org.slf4j.Logger;
 
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.Optional;
 
 @Plugin(
@@ -89,9 +90,14 @@ public final class BackToLastServer {
                 // 避免关闭的玩家被传送
                 if (!disableStore.getIsEnable(player.getUniqueId().toString())) return;
 
-                SendLastServer.sendPlayerLastServer(player);
-                lastServerStore.removeHistory(player.getUniqueId().toString()); // 避免二次触发
-                lastServerStore.saveAllHistory();
+                server.getScheduler().
+                        buildTask(this, () -> {
+                            SendLastServer.sendPlayerLastServer(player);
+                            lastServerStore.removeHistory(player.getUniqueId().toString()); // 避免二次触发
+                            lastServerStore.saveAllHistory();
+                        })
+                        .delay(Duration.ofSeconds(1))
+                        .schedule();
             }
         }
     }
