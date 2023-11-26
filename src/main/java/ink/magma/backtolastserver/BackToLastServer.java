@@ -16,6 +16,7 @@ import com.velocitypowered.api.proxy.ServerConnection;
 import ink.magma.backtolastserver.action.SendLastServer;
 import ink.magma.backtolastserver.command.DisableCommand;
 import ink.magma.backtolastserver.command.LastServerCommand;
+import ink.magma.backtolastserver.store.DisableServerStore;
 import ink.magma.backtolastserver.store.DisableStore;
 import ink.magma.backtolastserver.store.LastServerStore;
 import org.slf4j.Logger;
@@ -39,6 +40,7 @@ public final class BackToLastServer {
 
     public static LastServerStore lastServerStore;
     public static DisableStore disableStore;
+    public static DisableServerStore disableServerStore;
 
     @Inject
     public BackToLastServer(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory) {
@@ -50,6 +52,7 @@ public final class BackToLastServer {
 
         lastServerStore = new LastServerStore();
         disableStore = new DisableStore();
+        disableServerStore = new DisableServerStore();
     }
 
     @Subscribe
