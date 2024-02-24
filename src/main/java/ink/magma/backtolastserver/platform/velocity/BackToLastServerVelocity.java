@@ -1,4 +1,4 @@
-package ink.magma.backtolastserver;
+package ink.magma.backtolastserver.platform.velocity;
 
 import com.google.common.io.ByteArrayDataInput;
 import com.google.inject.Inject;
@@ -13,12 +13,12 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.ServerConnection;
-import ink.magma.backtolastserver.action.SendLastServer;
-import ink.magma.backtolastserver.command.DisableCommand;
-import ink.magma.backtolastserver.command.LastServerCommand;
-import ink.magma.backtolastserver.store.DisableServerStore;
-import ink.magma.backtolastserver.store.DisableStore;
-import ink.magma.backtolastserver.store.LastServerStore;
+import ink.magma.backtolastserver.BuildConstants;
+import ink.magma.backtolastserver.platform.PlatformHandler;
+import ink.magma.backtolastserver.platform.velocity.action.SendLastServer;
+import ink.magma.backtolastserver.platform.velocity.command.DisableCommand;
+import ink.magma.backtolastserver.platform.velocity.command.LastServerCommand;
+import ink.magma.backtolastserver.storage.StorageContainer;
 import org.slf4j.Logger;
 
 import java.nio.file.Path;
@@ -32,27 +32,26 @@ import java.util.Optional;
         description = "A plugin for Velocity that help players go to their last server after login",
         authors = {"MagmaBlock"}
 )
-public final class BackToLastServer {
+public final class BackToLastServerVelocity {
 
+    public static BackToLastServerVelocity instance;
     public static ProxyServer server;
     public static Logger logger;
     public static Path dataDirectory;
 
-    public static LastServerStore lastServerStore;
-    public static DisableStore disableStore;
-    public static DisableServerStore disableServerStore;
+    public StorageContainer storageContainer;
 
     @Inject
-    public BackToLastServer(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory) {
-        BackToLastServer.server = server;
-        BackToLastServer.logger = logger;
-        BackToLastServer.dataDirectory = dataDirectory;
+    public BackToLastServerVelocity(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory) {
+        instance = this;
+        BackToLastServerVelocity.server = server;
+        BackToLastServerVelocity.logger = logger;
+        BackToLastServerVelocity.dataDirectory = dataDirectory;
+
+        PlatformHandler.setPlatformType(PlatformHandler.PlatformType.Velocity);
 
         dataDirectory.toFile().mkdirs();
-
-        lastServerStore = new LastServerStore();
-        disableStore = new DisableStore();
-        disableServerStore = new DisableServerStore();
+        storageContainer = new StorageContainer();
     }
 
     @Subscribe
@@ -76,8 +75,8 @@ public final class BackToLastServer {
         if (serverConnection.isPresent()) {
             String serverID = serverConnection.get().getServerInfo().getName();
 
-            lastServerStore.setHistory(playerUUID, serverID);
-            lastServerStore.saveAllHistory();
+            this.storageContainer.lastServerStore.setHistory(playerUUID, serverID);
+            this.storageContainer.lastServerStore.saveAllHistory();
         }
     }
 
@@ -91,13 +90,13 @@ public final class BackToLastServer {
 
             if (message.equals("LOGIN") && player != null) {
                 // 避免关闭的玩家被传送
-                if (!disableStore.getIsEnable(player.getUniqueId().toString())) return;
+                if (!this.storageContainer.disableStore.getIsEnable(player.getUniqueId().toString())) return;
 
                 server.getScheduler().
                         buildTask(this, () -> {
                             SendLastServer.sendPlayerLastServer(player);
-                            lastServerStore.removeHistory(player.getUniqueId().toString()); // 避免二次触发
-                            lastServerStore.saveAllHistory();
+                            this.storageContainer.lastServerStore.removeHistory(player.getUniqueId().toString()); // 避免二次触发
+                            this.storageContainer.lastServerStore.saveAllHistory();
                         })
                         .delay(Duration.ofSeconds(1))
                         .schedule();

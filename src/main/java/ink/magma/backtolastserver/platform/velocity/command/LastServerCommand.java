@@ -1,4 +1,4 @@
-package ink.magma.backtolastserver.command;
+package ink.magma.backtolastserver.platform.velocity.command;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -9,7 +9,7 @@ import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.ConsoleCommandSource;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
-import ink.magma.backtolastserver.action.SendLastServer;
+import ink.magma.backtolastserver.platform.velocity.action.SendLastServer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 

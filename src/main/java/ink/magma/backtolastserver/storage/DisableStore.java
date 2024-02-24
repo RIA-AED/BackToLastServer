@@ -1,6 +1,6 @@
-package ink.magma.backtolastserver.store;
+package ink.magma.backtolastserver.storage;
 
-import ink.magma.backtolastserver.BackToLastServer;
+import ink.magma.backtolastserver.logger.UniLogger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.yaml.snakeyaml.Yaml;
@@ -14,14 +14,14 @@ import java.util.Set;
 
 public class DisableStore {
     public static Set<String> disableSet = new HashSet<>();
-    static File dataFolder = BackToLastServer.dataDirectory.toFile();
+    static File dataFolder = PluginFolderHandler.getPluginFolder();
     static File disableFile = new File(dataFolder.getPath(), "disable-users.yml");
     static Yaml yaml = new Yaml();
 
     public DisableStore() {
         Set<String> disableInFile = readAllDisable();
         if (disableInFile != null && !disableInFile.isEmpty()) {
-            BackToLastServer.logger.info("载入了 " + disableInFile.size() + " 条禁用记录.");
+            UniLogger.info("载入了 " + disableInFile.size() + " 条禁用记录.");
             disableSet = disableInFile;
         }
     }
@@ -60,7 +60,7 @@ public class DisableStore {
         try (FileWriter writer = new FileWriter(disableFile)) {
             writer.write(yamlString);
         } catch (IOException e) {
-            BackToLastServer.logger.error(e.toString());
+            UniLogger.warn(e.toString());
         }
     }
 
@@ -70,7 +70,7 @@ public class DisableStore {
             try (FileReader reader = new FileReader(disableFile)) {
                 return yaml.load(reader);
             } catch (IOException e) {
-                BackToLastServer.logger.error(e.toString());
+                UniLogger.warn(e.toString());
             }
         }
         return null;

@@ -1,6 +1,6 @@
-package ink.magma.backtolastserver.store;
+package ink.magma.backtolastserver.storage;
 
-import ink.magma.backtolastserver.BackToLastServer;
+import ink.magma.backtolastserver.logger.UniLogger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.yaml.snakeyaml.DumperOptions;
@@ -14,7 +14,7 @@ import java.util.HashMap;
 
 public class LastServerStore {
     public static HashMap<String, String> serverHistory = new HashMap<>();
-    static File dataFolder = BackToLastServer.dataDirectory.toFile();
+    static File dataFolder = PluginFolderHandler.getPluginFolder();
     static File historyFile = new File(dataFolder.getPath(), "history.yml");
     static Yaml yaml;
 
@@ -25,7 +25,7 @@ public class LastServerStore {
 
         HashMap<String, String> historyInFile = readAllHistory();
         if (historyInFile != null && !historyInFile.isEmpty()) {
-            BackToLastServer.logger.info("载入了 " + historyInFile.size() + " 条历史记录.");
+            UniLogger.info("载入了 " + historyInFile.size() + " 条历史记录.");
             serverHistory = historyInFile;
         }
     }
@@ -46,13 +46,13 @@ public class LastServerStore {
     public synchronized void saveAllHistory() {
         if (!dataFolder.exists()) {
             boolean result = dataFolder.mkdirs();
-            if (!result) BackToLastServer.logger.error("创建插件配置文件夹失败!");
+            if (!result) UniLogger.warn("创建插件配置文件夹失败!");
         }
 
         try (FileWriter writer = new FileWriter(historyFile)) {
             yaml.dump(serverHistory, writer);
         } catch (IOException e) {
-            BackToLastServer.logger.error(e.toString());
+            UniLogger.warn(e.toString());
         }
     }
 
@@ -62,7 +62,7 @@ public class LastServerStore {
             try (FileReader reader = new FileReader(historyFile)) {
                 return yaml.load(reader);
             } catch (IOException e) {
-                BackToLastServer.logger.error(e.toString());
+                UniLogger.warn(e.toString());
             }
         }
         return null;
