@@ -3,7 +3,6 @@ package ink.magma.backtolastserver.platform.bungee.action;
 
 import ink.magma.backtolastserver.message.MessageManager;
 import ink.magma.backtolastserver.platform.bungee.BackToLastServerBungee;
-import ink.magma.backtolastserver.storage.DisableServerStore;
 import ink.magma.backtolastserver.storage.LastServerStore;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
@@ -26,8 +25,9 @@ public class SendLastServer {
         String lastServerID = LastServerStore.serverHistory.get(onlinePlayer.getUniqueId().toString());
         if (lastServerID == null) return false;
 
-        // 查看目标服务器 ID 是否在黑名单中
-        if (DisableServerStore.disableServerList.contains(lastServerID)) return false;
+        // 查看目标服务器是否允许被返回
+        if (!BackToLastServerBungee.instance.storageContainer.enableServersConfig.getIsAllowed(lastServerID))
+            return false;
 
         // adv 听众
         Audience playerAudience = BackToLastServerBungee.instance.adventure().player(onlinePlayer);

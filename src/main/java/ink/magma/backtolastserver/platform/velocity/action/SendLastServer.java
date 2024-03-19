@@ -5,7 +5,6 @@ import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import ink.magma.backtolastserver.message.MessageManager;
 import ink.magma.backtolastserver.platform.velocity.BackToLastServerVelocity;
-import ink.magma.backtolastserver.storage.DisableServerStore;
 import ink.magma.backtolastserver.storage.LastServerStore;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
@@ -27,8 +26,9 @@ public class SendLastServer {
         String lastServerID = LastServerStore.serverHistory.get(onlinePlayer.getUniqueId().toString());
         if (lastServerID == null) return false;
 
-        // 查看目标服务器 ID 是否在黑名单中
-        if (DisableServerStore.disableServerList.contains(lastServerID)) return false;
+        // 查看子服是否允许被返回
+        if (!BackToLastServerVelocity.instance.storageContainer.enableServersConfig.getIsAllowed(lastServerID))
+            return false;
 
         // 查看目标服务器是否存在
         Optional<RegisteredServer> targetServer = BackToLastServerVelocity.server.getServer(lastServerID);

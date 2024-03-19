@@ -15,4 +15,8 @@ public class PluginFolderHandler {
         }
         return null;
     }
+
+    static File getFileInPluginFolder(String child) {
+        return new File(getPluginFolder(), child);
+    }
 }
