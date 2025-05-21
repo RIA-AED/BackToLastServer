@@ -2,6 +2,8 @@ package ink.magma.backtolastserver.platform.bungee.listener;
 
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
+
+import ink.magma.backtolastserver.logger.UniLogger;
 import ink.magma.backtolastserver.platform.bungee.BackToLastServerBungee;
 import ink.magma.backtolastserver.platform.bungee.action.SendLastServer;
 import ink.magma.backtolastserver.storage.StorageContainer;
@@ -17,40 +19,54 @@ import java.util.concurrent.TimeUnit;
 public class PlayerListener implements Listener {
     @EventHandler
     public void onPlayerDisconnent(PlayerDisconnectEvent event) {
-        String serverID = event.getPlayer().getServer().getInfo().getName();
-        String playerUUID = event.getPlayer().getUniqueId().toString();
+        ProxiedPlayer player = event.getPlayer();
+        Server server = player.getServer();
+        String playerUUID = player.getUniqueId().toString();
 
+        if (server == null) {
+            UniLogger.warn(
+                    "PlayerDisconnectEvent: " + player.getName() +
+                            ", UUID=" + playerUUID + ", getServer() 为 null! 跳过历史记录保存。这可能是因为玩家意外离线，可安全忽略。");
+            return;
+        }
+
+        String serverID = server.getInfo().getName();
         if (serverID != null) {
             getStorageContainer().lastServerStore.setHistory(playerUUID, serverID);
             getStorageContainer().lastServerStore.saveAllHistory();
         }
     }
 
-
     /**
      * Functions "onAuthmePluginMessage" and "handleOnLogin" source came from:
-     * <a href="https://github.com/AuthMe/AuthMeBungee/blob/master/src/main/java/fr/xephi/authmebungee/listeners/BungeeMessageListener.java">AuthmeBungee</a>
+     * <a href=
+     * "https://github.com/AuthMe/AuthMeBungee/blob/master/src/main/java/fr/xephi/authmebungee/listeners/BungeeMessageListener.java">AuthmeBungee</a>
      */
     @EventHandler
     public void onAuthmePluginMessage(final PluginMessageEvent event) {
-        if (event.isCancelled()) return;
+        if (event.isCancelled())
+            return;
 
         // Check if the message is for a server (ignore client messages)
-        if (!event.getTag().equals("BungeeCord")) return;
+        if (!event.getTag().equals("BungeeCord"))
+            return;
 
         // Check if a player is not trying to send us a fake message
-        if (!(event.getSender() instanceof Server)) return;
+        if (!(event.getSender() instanceof Server))
+            return;
 
         // Read the plugin message
         final ByteArrayDataInput in = ByteStreams.newDataInput(event.getData());
 
         // Accept only broadcasts
-        if (!in.readUTF().equals("Forward")) return;
+        if (!in.readUTF().equals("Forward"))
+            return;
 
         in.readUTF(); // Skip ONLINE/ALL parameter
 
         // Let's check the subchannel
-        if (!in.readUTF().equals("AuthMe.v2.Broadcast")) return;
+        if (!in.readUTF().equals("AuthMe.v2.Broadcast"))
+            return;
 
         // Read data byte array
         final short dataLength = in.readShort();
@@ -77,12 +93,12 @@ public class PlayerListener implements Listener {
                 BackToLastServerBungee.instance,
                 () -> {
                     SendLastServer.sendPlayerLastServer(player);
-                    BackToLastServerBungee.instance.storageContainer.lastServerStore.removeHistory(player.getUniqueId().toString()); // 避免二次触发
+                    BackToLastServerBungee.instance.storageContainer.lastServerStore
+                            .removeHistory(player.getUniqueId().toString()); // 避免二次触发
                     BackToLastServerBungee.instance.storageContainer.lastServerStore.saveAllHistory();
                 },
                 500,
-                TimeUnit.MILLISECONDS
-        );
+                TimeUnit.MILLISECONDS);
     }
 
     private static StorageContainer getStorageContainer() {
