@@ -31,6 +31,7 @@ import java.util.Optional;
         name = "BackToLastServer",
         version = BuildConstants.VERSION,
         description = "A plugin for Velocity that help players go to their last server after login",
+        url = "https://github.com/RIA-AED/BackToLastServer",
         authors = {"MagmaBlock"}
 )
 public final class BackToLastServerVelocity {

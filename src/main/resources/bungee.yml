@@ -3,5 +3,6 @@ main: ink.magma.backtolastserver.platform.bungee.BackToLastServerBungee
 version: '${version}'
 description: "A plugin for Velocity that help players go to their last server after login"
 author: MagmaBlock
+website: https://github.com/RIA-AED/BackToLastServer
 depends:
   - ajQueue
