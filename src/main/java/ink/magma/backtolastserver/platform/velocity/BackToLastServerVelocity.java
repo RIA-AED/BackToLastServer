@@ -8,6 +8,7 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.connection.PluginMessageEvent;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
+import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.Player;
@@ -61,8 +62,8 @@ public final class BackToLastServerVelocity {
         BrigadierCommand lastServerCommand = LastServerCommand.createBrigadierCommand(server);
         DisableCommand disableCommand = new DisableCommand();
 
-        commandManager.register("lastserver", lastServerCommand);
-        commandManager.register("togglelastserver", disableCommand);
+        commandManager.register(commandManager.metaBuilder("lastserver").build(), lastServerCommand);
+        commandManager.register(commandManager.metaBuilder("togglelastserver").build(), disableCommand);
 
         logger.info("BackToLastServer has loaded!");
     }
@@ -76,7 +77,17 @@ public final class BackToLastServerVelocity {
             String serverID = serverConnection.get().getServerInfo().getName();
 
             this.storageContainer.lastServerStore.setHistory(playerUUID, serverID);
+            this.storageContainer.lastServerStore.requestSave();
+        }
+    }
+
+    @Subscribe
+    public void onProxyShutdown(ProxyShutdownEvent event) {
+        // 关停兜底: 同步全量落盘一次, 防止 debounce 队列里的待保存任务被进程退出丢掉.
+        try {
             this.storageContainer.lastServerStore.saveAllHistory();
+        } catch (Throwable t) {
+            logger.warn("BackToLastServer: 保存历史记录失败: " + t);
         }
     }
 
@@ -96,7 +107,7 @@ public final class BackToLastServerVelocity {
                         buildTask(this, () -> {
                             SendLastServer.sendPlayerLastServer(player);
                             this.storageContainer.lastServerStore.removeHistory(player.getUniqueId().toString()); // 避免二次触发
-                            this.storageContainer.lastServerStore.saveAllHistory();
+                            this.storageContainer.lastServerStore.requestSave();
                         })
                         .delay(Duration.ofSeconds(1))
                         .schedule();

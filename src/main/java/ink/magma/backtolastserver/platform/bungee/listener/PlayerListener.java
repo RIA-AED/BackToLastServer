@@ -33,7 +33,7 @@ public class PlayerListener implements Listener {
         String serverID = server.getInfo().getName();
         if (serverID != null) {
             getStorageContainer().lastServerStore.setHistory(playerUUID, serverID);
-            getStorageContainer().lastServerStore.saveAllHistory();
+            getStorageContainer().lastServerStore.requestSave();
         }
     }
 
@@ -95,7 +95,7 @@ public class PlayerListener implements Listener {
                     SendLastServer.sendPlayerLastServer(player);
                     BackToLastServerBungee.instance.storageContainer.lastServerStore
                             .removeHistory(player.getUniqueId().toString()); // 避免二次触发
-                    BackToLastServerBungee.instance.storageContainer.lastServerStore.saveAllHistory();
+                    BackToLastServerBungee.instance.storageContainer.lastServerStore.requestSave();
                 },
                 500,
                 TimeUnit.MILLISECONDS);

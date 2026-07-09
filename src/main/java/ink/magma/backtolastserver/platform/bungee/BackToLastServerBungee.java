@@ -31,6 +31,12 @@ public class BackToLastServerBungee extends Plugin {
 
     @Override
     public void onDisable() {
+        // 关停兜底: 同步全量落盘一次, 防止 debounce 队列里的待保存任务被进程退出丢掉.
+        try {
+            storageContainer.lastServerStore.saveAllHistory();
+        } catch (Throwable t) {
+            getLogger().warning("BackToLastServer: 保存历史记录失败: " + t);
+        }
         if (this.adventure != null) {
             this.adventure.close();
             this.adventure = null;
