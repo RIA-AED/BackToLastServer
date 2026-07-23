@@ -41,6 +41,8 @@ public class PlayerListener implements Listener {
      * Functions "onAuthmePluginMessage" and "handleOnLogin" source came from:
      * <a href=
      * "https://github.com/AuthMe/AuthMeBungee/blob/master/src/main/java/fr/xephi/authmebungee/listeners/BungeeMessageListener.java">AuthmeBungee</a>
+     * <p>
+     * 兼容 AuthMe 5.x 的旧协议 (BungeeCord/Forward/AuthMe.v2.Broadcast)。
      */
     @EventHandler
     public void onAuthmePluginMessage(final PluginMessageEvent event) {
@@ -81,9 +83,47 @@ public class PlayerListener implements Listener {
         }
     }
 
+    /**
+     * 兼容 AuthMe 6.0.0+ 的新协议: 自定义频道 {@code authme:main}，
+     * payload 为 {@code MessageType.getId()} (login 动作为 "login") + 小写用户名。
+     * 参考上游 {@code fr.xephi.authme.bungee.BungeeProxyBridge} 的接收逻辑。
+     */
+    @EventHandler
+    public void onAuthmePluginMessageV6(final PluginMessageEvent event) {
+        if (event.isCancelled())
+            return;
+
+        // AuthMe 6.0.0+ 使用自定义频道 authme:main
+        if (!event.getTag().equals("authme:main"))
+            return;
+
+        // Check if a player is not trying to send us a fake message
+        if (!(event.getSender() instanceof Server))
+            return;
+
+        try {
+            // Read the plugin message
+            final ByteArrayDataInput in = ByteStreams.newDataInput(event.getData());
+
+            // 只处理 login 动作, 其余类型 (logout / perform.login.ack / premium.*) 忽略
+            final String type = in.readUTF();
+            if (type.equals("login")) {
+                handleOnLogin(in);
+            }
+        } catch (IllegalStateException e) {
+            UniLogger.warn("收到格式错误的 AuthMe authme:main 插件消息，已忽略。");
+        }
+    }
+
     private void handleOnLogin(final ByteArrayDataInput in) {
         final String name = in.readUTF();
         ProxiedPlayer player = BackToLastServerBungee.instance.getProxy().getPlayer(name);
+        if (player == null) {
+            UniLogger.warn("AuthMe login 触发: 未找到玩家 '" + name + "', 跳过回到上次子服。");
+            return;
+        }
+
+        UniLogger.info("AuthMe login 触发: 玩家 " + player.getName() + " 认证成功, 准备回到上次子服。");
 
         // 避免关闭的玩家被传送
         if (!BackToLastServerBungee.instance.storageContainer.disableStore.getIsEnable(player.getUniqueId().toString()))

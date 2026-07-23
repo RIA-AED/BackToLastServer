@@ -26,6 +26,9 @@ public class BackToLastServerBungee extends Plugin {
         BungeeCommandHandler commandHandler = BungeeCommandHandler.create(this);
         commandHandler.register(new DisableCommand());
 
+        // AuthMe 6.0.0+ 使用自定义频道 authme:main 通知跨端登录, 需在 proxy 侧注册才能收到 PluginMessageEvent
+        getProxy().registerChannel("authme:main");
+
         getProxy().getPluginManager().registerListener(this, new PlayerListener());
     }
 
@@ -37,6 +40,8 @@ public class BackToLastServerBungee extends Plugin {
         } catch (Throwable t) {
             getLogger().warning("BackToLastServer: 保存历史记录失败: " + t);
         }
+        // 反注册 authme:main 频道
+        getProxy().unregisterChannel("authme:main");
         if (this.adventure != null) {
             this.adventure.close();
             this.adventure = null;
